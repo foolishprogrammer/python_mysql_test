@@ -1,19 +1,48 @@
 import connect_db as db
 
+data_db_column = {
+    "response_id": 0,
+    "user_id": 1,
+    "prompt": 2,
+    "response": 3,
+    "confirmed": 4
+}
+
+user_db_column = {
+    "user_id":0,
+    "name":1,
+}
+
+class data_tables:
+    def __init__(self, data_query):
+        self.response_id = [i[0] for i in data_query]
+        self.user_id = [i[1] for i in data_query]
+        self.prompt = [i[2] for i in data_query]
+        self.response =  [i[3] for i in data_query]
+        self.confirmed = [i[4] for i in data_query]
+        self.confirmed_count =[]
+        for i in range(1,6):
+            self.confirmed_count.append([i, self.user_id.count(i)])
+        self.confirmed_count.sort(reverse=True, key=self.top_sort)
+    
+    def top_sort(self, value):
+        return value[1]
+
+    def
+
+
+
 query = db.connect.cursor()
 
-users_query = "SELECT * FROM users"
+user_sql = "SELECT * FROM users"
 
-if(query.execute(users_query)) !=0 :
-    users_list = query.fetchall()
+data_sql = "SELECT * FROM data WHERE confirmed = 'yes' ORDER BY user_id"
 
-data_query = "SELECT * FROM data"
+query.execute(data_sql)
 
-if (query.execute(data_query)) !=0 :
-    data_list = query.fetchall()
+data_list = query.fetchall()
 
-for i in users_list :
-    print(i)
+data_test = data_tables(data_list)
 
-for i in data_list :
-    print(i)
+print(data_test.confirmed_count)
+
