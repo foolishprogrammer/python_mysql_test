@@ -1,5 +1,10 @@
+# This is an assessent mini-task
+
+# Separating the function to connect to database server
 import connect_db as db
 
+# The task ask for function, but I have the habit to lose track of variable naming
+# so I choose to put all I need related to the database into a class and class method.
 class database:
     def __init__(self, data_query, user_query) :
         self.data_response_id = [i[0] for i in data_query]
@@ -9,7 +14,8 @@ class database:
         self.data_confirmed = [i[4] for i in data_query]
         self.data_confirmed_yes = []
         self.data_confirmed_no = []
-
+        
+        # Separating the lists of id for each row that have confirmed = "yes" and "no"
         for i in range(len(self.data_confirmed)):
             if self.data_confirmed[i] == "yes":
                 self.data_confirmed_yes.append(self.data_user_id[i])
@@ -18,27 +24,34 @@ class database:
         self.user_user_id = [i[0] for i in user_query]
         self.user_name = [i[1] for i in user_query]
         
+        # Count all the amount response for each user regardless if it is confirmed "yes" or "no"
         self.data_confirmed_count = []
         for i in range(1, len(self.user_user_id)+1):
             self.data_confirmed_count.append([i, self.data_user_id.count(i)])
         
+        # Count all the amount response for each user that confirmed = "yes"
         self.data_confirmed_yes_count =[]
         for i in range(1,len(self.user_user_id)+1):
             self.data_confirmed_yes_count.append([i, self.data_confirmed_yes.count(i)])
         
+        # Count all the amount response for each user that confirmed = "no"
         self.data_confirmed_no_count = []
         for i in range(1,len(self.user_user_id)+1):
             self.data_confirmed_no_count.append([i, self.data_confirmed_no.count(i)])
 
+        # Sorting all the the confirmed count with key to be able rank each user
         self.data_confirmed_yes_count.sort(reverse=True, key=self.top_sort)
         self.data_confirmed_no_count.sort(reverse=True, key=self.top_sort)
         self.data_confirmed_count.sort(reverse=True, key=self.top_sort)
 
+    # Used as the key for sorting data_confirmed
     def top_sort(self, value) :
         return value[1]
-
+    
+    # Retrieving all the top ranked users
     def show_top_ranked(self, value=1, choice = 0):
         self.rank_top = []
+        # I make the access for each confirmed category. Because, Why not?
         if choice == 1 :
             for i in self.data_confirmed_yes_count[:value]:
                 self.rank_top.append([self.user_name[self.user_user_id.index(i[0])], i[0], i[1]])
@@ -50,12 +63,16 @@ class database:
                 self.rank_top.append([self.user_name[self.user_user_id.index(i[0])], i[0], i[1]])
         return self.rank_top
     
+    # I can't get this function out of my head, so I just write this just to keep my head clear.
+    # Works the same way with show_top_ranked, but for the lowest rank rather than the top rank.
     def show_bottom_ranked(self,value) :
         self.rank_bottom =[]
         for i in self.data_confirmed_count[-abs(value):]:
             self.rank_bottom.append([self.user_name[self.user_user_id.index(i[0])], i[0], i[1]])
         return self.rank_bottom
     
+    # This function is the confirmed status key for sorting the user with certain amount of difference
+    # between response and prompt
     def response_prompt_filter(self, value, comparator):
         if comparator==value :
             return True
@@ -64,6 +81,7 @@ class database:
         else :
             return False
 
+    # Filter the amount of user and row(s) with specific difference between response and prompt
     def response_to_prompt(self, value = 0, comparator = "all") :
         self.response_prompt_list_count=[]
         for i in range(len(self.data_confirmed)):
@@ -76,6 +94,7 @@ class database:
                 continue                   
         return self.response_prompt_list_count  
 
+    # Return the ranked Users from response_to_prompt function, and you can decide how many rank.
     def ranked_response_to_prompt(self, value = 0, comparator = "all", rank = 1):
         response_prompt = self.response_to_prompt(value, comparator)
         response_to_prompt_id_list = [i[1] for i in response_prompt]
@@ -87,13 +106,13 @@ class database:
 
         return self.response_to_prompt_id_count[:rank]
 
-
+    # This is a key to sort response_to_prompt_id_count
     def ranked_response_to_prompt_sort(self, value) :
         return value[2]
 
             
         
-
+# Simple interface for the 1st task
 def first_task(database_object):
     print("First task is to display the top 3 users with most confirmed responses!")
     print("What the confirmation status you are looking for?")
@@ -111,6 +130,7 @@ def first_task(database_object):
     else :
         return 0
 
+# Simple interface for the 2nd task
 def second_task(database_object):
     print("Second task is to display the name of the user who has the most responses with difference of more than 6 from the prompt")
     print("What the confirmation status you are looking for?")   
@@ -153,8 +173,22 @@ data_list = query.fetchall()
 
 database_test = database(data_list, user_list)
 
-print("This is the Take Home Coding Test!\n")
+# Start of the interface
+print("This is the Take Home Codinga Test!\n")
 
-first_task(database_test)
+print("This is the answer for 1st task of the assesment : ")
 
-second_task(database_test)
+print(database_test.show_top_ranked(3,1))
+
+print("This is the answer for 2nd task of the assesment : ")
+
+print(database_test.ranked_response_to_prompt(6,"all",1))
+
+# Trying the custom interface function to access the object with different parameter
+if input("Want to try something else related to this task? (Y/n) ").lower() == "y" :
+    first_task(database_test)
+
+    second_task(database_test)
+
+# Program end reminder
+print("Finished")
