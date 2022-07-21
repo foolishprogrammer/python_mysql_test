@@ -71,24 +71,29 @@ class dataDatabase:
     # and count how many times the each user id that fit the condition given
     # (in this case, if the difference is bigger than given value)
     def top_difference(
-        self, condition: int, confirmation: str, rank: int = 1
+        self, condition: int, confirmation: str = "all", rank: int = 1
     ) -> list[tuple]:
         ranked: list = []
-        difference_count: list = []
 
         def prompt_response_difference(prompt: str, response: str) -> int:
             return len(response.split()) - len(prompt.split())
 
-        for i in range(len(self.user_id)):
-            difference_count.append(
-                (
-                    self.user_id[i],
-                    prompt_response_difference(self.prompt[i], self.response[i]),
-                )
-                if (self.confirmed[i] == confirmation or confirmation == "all")
-                else None
+        difference_count: list = [
+            self.user_id[i]
+            for i in range(len(self.user_id))
+            if (
+                abs(prompt_response_difference(self.prompt[i], self.response[i]))
+                >= condition
             )
+            and (confirmation == self.confirmed[i] or confirmation == "all")
+        ]
 
+        data_uid = list(set(self.user_id))
+
+        for i in data_uid:
+            ranked.append((i, difference_count.count(i)))
+
+        ranked.sort(key=self.sort_key, reverse=True)
         return ranked[:rank]
 
 
@@ -132,6 +137,8 @@ def main() -> None:
     data = dataDatabase(data_db)
 
     print(user.retrieve_name(data.top_rank(3, "yes")))
+
+    print(user.retrieve_name(data.top_difference(0, "yes")))
 
 
 if __name__ == "__main__":
